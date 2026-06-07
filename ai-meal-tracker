@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Meal Tracker - Track Food & Mood</title>
+    <link rel="stylesheet" href="style.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1701635001084534" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- HEADER WITH INDIAN FLAG COLORS -->
+    <div class="header">
+        <div class="flag-top"></div>
+        <div class="header-content">
+            <h1>🍽️ AI Meal Tracker</h1>
+            <p>Track Food & Mood • Earn Points</p>
+        </div>
+        <div class="flag-bottom"></div>
+    </div>
+
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="screen active">
+        <div class="container">
+            <!-- SECTION 1: FOOD PHOTO -->
+            <div class="card">
+                <h2>📸 Step 1: Upload Food Photo</h2>
+                <input type="file" id="foodPhoto" accept="image/*" class="hidden-input">
+                <label for="foodPhoto" class="btn-upload">📷 Choose Photo or Take Picture</label>
+                <div id="photoPreview" class="photo-preview"></div>
+            </div>
+
+            <!-- SECTION 2: MOOD SELECTOR -->
+            <div class="card">
+                <h2>😊 Step 2: Select Your Mood</h2>
+                <div class="mood-grid">
+                    <button class="mood-btn" data-mood="😊 Happy" onclick="selectMood(this)">
+                        <span class="mood-emoji">😊</span>
+                        <span class="mood-text">Happy</span>
+                    </button>
+                    <button class="mood-btn" data-mood="😔 Sad" onclick="selectMood(this)">
+                        <span class="mood-emoji">😔</span>
+                        <span class="mood-text">Sad</span>
+                    </button>
+                    <button class="mood-btn" data-mood="😤 Stressed" onclick="selectMood(this)">
+                        <span class="mood-emoji">😤</span>
+                        <span class="mood-text">Stressed</span>
+                    </button>
+                    <button class="mood-btn" data-mood="😴 Tired" onclick="selectMood(this)">
+                        <span class="mood-emoji">😴</span>
+                        <span class="mood-text">Tired</span>
+                    </button>
+                    <button class="mood-btn" data-mood="😋 Excited" onclick="selectMood(this)">
+                        <span class="mood-emoji">😋</span>
+                        <span class="mood-text">Excited</span>
+                    </button>
+                    <button class="mood-btn" data-mood="😡 Angry" onclick="selectMood(this)">
+                        <span class="mood-emoji">😡</span>
+                        <span class="mood-text">Angry</span>
+                    </button>
+                </div>
+                <p id="moodSelected" class="mood-display">No mood selected</p>
+            </div>
+
+            <!-- SECTION 3: INDIAN FOOD DATABASE -->
+            <div class="card">
+                <h2>🥘 Step 3: Select Indian Food</h2>
+                <select id="foodDatabase" class="food-select">
+                    <option value="">-- Choose Food --</option>
+                    <optgroup label="🍛 Curries">
+                        <option value="Biryani|450|18|55|15">Biryani (450 cal)</option>
+                        <option value="Butter Chicken|350|25|20|18">Butter Chicken (350 cal)</option>
+                        <option value="Paneer Tikka|250|25|2|17">Paneer Tikka (250 cal)</option>
+                        <option value="Daal|200|12|30|2">Daal (200 cal)</option>
+                    </optgroup>
+                    <optgroup label="🫓 Street Food">
+                        <option value="Samosa|200|4|25|10">Samosa (200 cal)</option>
+                        <option value="Pani Puri|150|3|30|2">Pani Puri (150 cal)</option>
+                        <option value="Chaat|180|5|28|5">Chaat (180 cal)</option>
+                    </optgroup>
+                    <optgroup label="🍞 Bread & Rice">
+                        <option value="Naan|300|8|42|12">Naan (300 cal)</option>
+                        <option value="Chapati|70|2|14|0.5">Chapati (70 cal)</option>
+                        <option value="Rice|150|3|33|0.3">Rice (150 cal per 100g)</option>
+                    </optgroup>
+                    <optgroup label="🥛 Dairy">
+                        <option value="Yogurt|100|3|4|5">Yogurt (100 cal)</option>
+                        <option value="Milk|61|3|5|3">Milk (61 cal)</option>
+                        <option value="Paneer|110|12|1|7">Paneer (110 cal)</option>
+                    </optgroup>
+                    <optgroup label="🥗 Healthy">
+                        <option value="Salad|50|2|8|1">Salad (50 cal)</option>
+                        <option value="Idli|60|2|12|0.5">Idli (60 cal)</option>
+                        <option value="Upma|150|4|25|3">Upma (150 cal)</option>
+                    </optgroup>
+                </select>
+                <p id="foodSelected" class="food-display">No food selected</p>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="button-group">
+                <button class="btn-primary" onclick="analyzeMeal()">🚀 Analyze Nutrition</button>
+                <button class="btn-secondary" onclick="showHistory()">📋 View History</button>
+                <button class="btn-tertiary" onclick="clearAll()">🔄 Clear All</button>
+            </div>
+
+            <!-- POINTS -->
+            <div class="points-display">
+                ⭐ Points: <span id="userPoints">0</span> | Share to earn more!
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results-screen" class="screen">
+        <div class="container">
+            <button class="btn-back" onclick="goBack()">← Back</button>
+            
+            <div class="result-card">
+                <h2>📊 Nutrition Analysis</h2>
+                
+                <div id="resultPhoto" class="result-photo"></div>
+                <div id="resultMood" class="result-mood"></div>
+                <div id="resultFood" class="result-food"></div>
+                
+                <div class="nutrition-box">
+                    <h3>📈 Nutrients</h3>
+                    <div id="nutritionDetails" class="nutrition-details"></div>
+                </div>
+                
+                <div class="ai-tip-box">
+                    <h3>💡 AI Tip for Your Mood</h3>
+                    <p id="aiTip"></p>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="shareOnWhatsApp()">📤 Share on WhatsApp</button>
+                    <button class="btn-secondary" onclick="saveMeal()">💾 Save Meal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORY SCREEN -->
+    <div id="history-screen" class="screen">
+        <div class="container">
+            <button class="btn-back" onclick="goBack()">← Back</button>
+            <h2>📋 Today's Meal History</h2>
+            <div id="historyList" class="history-list"></div>
+            <button class="btn-secondary" onclick="exportHistory()">📥 Export History</button>
+        </div>
+    </div>
+
+    <!-- LOADING SPINNER -->
+    <div id="loading" class="loading hidden">
+        <div class="spinner"></div>
+        <p>Analyzing meal...</p>
+    </div>
+
+    <!-- AD SPACE -->
+    <div class="ad-space">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1701635001084534"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1701635001084534" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
