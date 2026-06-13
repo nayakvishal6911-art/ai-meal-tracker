@@ -42,156 +42,45 @@ document.getElementById('foodDatabase').addEventListener('change', function() {
     }
 });
 
-// ANALYZE MEAL
-function analyzeMeal() {
+// ANALYZE MEAL 
+async function analyzeMeal() {
     if (!selectedMood) {
-        alert('❌ Please select your mood first');
+        alert('Please select your mood first');
         return;
     }
     
     if (!selectedFood) {
-        alert('❌ Please select a food from the database');
+        alert('Please select a food from the database');
         return;
     }
-
-    // SHOW LOADING
+    
     document.getElementById('loading').classList.remove('hidden');
-
-    // SIMULATE AI ANALYSIS (1 second delay)
-    setTimeout(function() {
-        // GET AI TIPS BASED ON MOOD
-        const moodTips = {
-            '😊 Happy': '🌟 Your mood is great! This meal will give you steady energy. Perfect choice!',
-            '😔 Sad': '💪 Add protein to boost serotonin. This meal has good protein - great for mood!',
-            '😤 Stressed': '🧘 Include magnesium (nuts/seeds). Your meal is balanced - will help calm you.',
-            '😴 Tired': '⚡ You need carbs + protein for energy. Perfect! This meal will energize you.',
-            '😋 Excited': '🎉 Enjoy every bite! Your excitement will make this meal taste even better!',
-            '😡 Angry': '🙏 Take deep breaths. Your meal is nutritious - will help regulate emotions.'
-        };
-
-        // SHOW RESULTS SCREEN
-        document.getElementById('resultPhoto').innerHTML = foodPhoto ? '<img src="' + foodPhoto + '" alt="Food">' : '<p>📸 No photo uploaded</p>';
-        document.getElementById('resultMood').innerHTML = '<strong>Your Mood:</strong> ' + selectedMood;
-        document.getElementById('resultFood').innerHTML = '<strong>Food:</strong> ' + selectedFood.name;
-
-        // NUTRITION DETAILS
-        document.getElementById('nutritionDetails').innerHTML = 
-            '<div class="nutrition-item"><span class="nutrition-label">Calories</span><span class="nutrition-value">' + selectedFood.calories + ' cal</span></div>' +
-            '<div class="nutrition-item"><span class="nutrition-label">Protein</span><span class="nutrition-value">' + selectedFood.protein + 'g</span></div>' +
-            '<div class="nutrition-item"><span class="nutrition-label">Carbs</span><span class="nutrition-value">' + selectedFood.carbs + 'g</span></div>' +
-            '<div class="nutrition-item"><span class="nutrition-label">Fat</span><span class="nutrition-value">' + selectedFood.fat + 'g</span></div>';
-
-        // AI TIP
-        document.getElementById('aiTip').textContent = moodTips[selectedMood] || '✅ Great meal choice for your mood!';
-
-        // HIDE LOADING & SHOW RESULTS
-        document.getElementById('loading').classList.add('hidden');
-        switchScreen('results-screen');
-
-    }, 1000);
-}
-
-// SAVE MEAL
-function saveMeal() {
-    const timestamp = new Date().toLocaleTimeString('en-IN') + ' - ' + new Date().toLocaleDateString('en-IN');
-    const mealEntry = {
-        food: selectedFood.name,
-        mood: selectedMood,
-        time: timestamp,
-        calories: selectedFood.calories
-    };
-
-    mealHistory.push(mealEntry);
-    localStorage.setItem('mealHistory', JSON.stringify(mealHistory));
-
-    // ADD POINTS
-    userPoints += 10;
-    localStorage.setItem('userPoints', userPoints.toString());
-    document.getElementById('userPoints').textContent = userPoints;
-
-    alert('✅ Meal saved! +10 points earned! Total: ' + userPoints + ' points');
-}
-
-// SHARE ON WHATSAPP
-function shareOnWhatsApp() {
-    const text = '🍽️ Just tracked my meal!\n' +
-        'Food: ' + selectedFood.name + '\n' +
-        'Mood: ' + selectedMood + '\n' +
-        'Calories: ' + selectedFood.calories + ' kcal\n\n' +
-        '📱 Download AI Meal Tracker:\n' +
-        'Track your nutrition & mood daily! 🎯';
     
-    const url = 'https://wa.me/?text=' + encodeURIComponent(text);
-    window.open(url, '_blank');
-}
-
-// SHOW HISTORY
-function showHistory() {
-    const historyList = document.getElementById('historyList');
-    
-    if (mealHistory.length === 0) {
-        historyList.innerHTML = '<p style="text-align:center; color:#999;">No meals logged yet. Start tracking! 🍽️</p>';
-    } else {
-        let totalCalories = 0;
-        let html = '';
-
-        for (let i = mealHistory.length - 1; i >= 0; i--) {
-            const meal = mealHistory[i];
-            totalCalories += parseInt(meal.calories);
-            html += '<div class="history-item">' +
-                '<strong>' + meal.food + '</strong><br>' +
-                '😊 Mood: ' + meal.mood + '<br>' +
-                '⏰ ' + meal.time + '<br>' +
-                '🔥 ' + meal.calories + ' cal' +
-                '</div>';
+    try {
+        const backendURL = 'https://ai-meal-tracker-api.onrender.com/api/analyze-food';
+        
+        const response = await fetch(backendURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                food: selectedFood.name,
+                mood: selectedMood
+            })
+        });
+        
+        const nutritionData = await response.json();
+        
+        if (nutritionData.error) {
+            displayResults(selectedFood);
+        } else {
+            displayResults(nutritionData);
         }
-
-        historyList.innerHTML = '<div class="nutrition-box"><strong>Today Total:</strong> ' + totalCalories + ' calories</div>' + html;
+    } catch (error) {
+        console.log('Error:', error);
+        displayResults(selectedFood);
     }
-
-    switchScreen('history-screen');
-}
-
-// EXPORT HISTORY
-function exportHistory() {
-    const text = 'My Meal Tracker History\n' +
-        '========================\n\n' +
-        mealHistory.map(m => m.time + '\n' + m.food + ' (' + m.mood + ') - ' + m.calories + ' cal').join('\n\n') +
-        '\n\n✨ Powered by AI Meal Tracker';
     
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'meal-history.txt';
-    a.click();
+    document.getElementById('loading').classList.add('hidden');
 }
-
-// CLEAR ALL
-function clearAll() {
-    if (confirm('Are you sure? This will clear all selections.')) {
-        selectedMood = null;
-        selectedFood = null;
-        foodPhoto = null;
-        document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById('moodSelected').textContent = 'No mood selected';
-        document.getElementById('foodSelected').textContent = 'No food selected';
-        document.getElementById('photoPreview').innerHTML = '';
-        document.getElementById('foodDatabase').value = '';
-        alert('✅ All cleared!');
-    }
-}
-
-// NAVIGATION
-function switchScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
-}
-
-function goBack() {
-    switchScreen('main-screen');
-}
-
-// INITIALIZE
-document.getElementById('userPoints').textContent = userPoints;
-console.log('✅ AI Meal Tracker Loaded!');
