@@ -65,9 +65,8 @@ async function analyzeMeal() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                food: selectedFood.name,
-                mood: selectedMood
-            })
+        image: foodPhotoBase64
+    })
         });
         
         const nutritionData = await response.json();
